@@ -7,106 +7,177 @@ export const useSudokuContext = () => {
 };
 
 export const SudokuProvider = ({ children }) => {
-  const getRandomInt = (max) => {
-    return Math.floor(Math.random() * max);
+  const [gameBoard, setGameBoard] = useState([]);
+  const [regions, setRegions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const SIZE = 9;
+
+  const startGame = async (difficulty) => {
+    setLoading(true);
+
+    // Generate a solved puzzle
+    const solvedGameBoard = generateSolvedPuzzle();
+    setGameBoard(solvedGameBoard);
+
+    // Create regions from the solved puzzle
+    const puzzleWithRegions = createRegions(solvedGameBoard);
+    setRegions(puzzleWithRegions);
+
+    // Remove cells based on difficulty
+    const puzzleWithRemovedCells = removeCellsBasedOnDifficulty(
+      puzzleWithRegions,
+      difficulty,
+    );
+    setRegions(puzzleWithRemovedCells);
+    console.log("Final gameBoard:", solvedGameBoard);
+    console.log("Final regions:", puzzleWithRemovedCells);
+    setLoading(false);
   };
 
   const generateSolvedPuzzle = () => {
-    const puzzle = Array.from({ length: 9 }, () => Array(9).fill({}));
+    const board = Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
 
-    for (let row = 0; row < puzzle.length; row++) {
-      for (let col = 0; col < puzzle[row].length; col++) {
-        let num = getANoNConflictingNumber(row, col, puzzle);
-        if (num === 0) {
-          // Clear the entire row and restart the loop for the current row
-          puzzle[row] = Array(9).fill({});
-          col = -1; // Set col to -1 so that it becomes 0 after incrementing
-        } else {
-          puzzle[row][col] = {
-            col,
-            row,
-            value: num,
-          };
+    // Shuffle numbers 1 to 9 for the first row
+    board[0] = shuffleArray(Array.from({ length: SIZE }, (_, i) => i + 1));
+
+    if (solveSudoku(board)) {
+      return board;
+    }
+
+    return null; // If no solution is found, return null
+  };
+  const shuffleArray = (array) => {
+    // Fisher-Yates shuffle algorithm
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+  const solveSudoku = (board) => {
+    const emptyCell = findEmptyCell(board);
+    if (!emptyCell) {
+      // If no empty cell is found, the puzzle is solved
+      return true;
+    }
+
+    const { row, col } = emptyCell;
+
+    for (let num = 1; num <= SIZE; num++) {
+      if (isValid(board, row, col, num)) {
+        board[row][col] = num;
+
+        if (solveSudoku(board)) {
+          return true;
+        }
+
+        board[row][col] = null;
+      }
+    }
+
+    return false;
+  };
+
+  const findEmptyCell = (board) => {
+    for (let row = 0; row < SIZE; row++) {
+      for (let col = 0; col < SIZE; col++) {
+        if (board[row][col] === null) {
+          return { row, col };
         }
       }
     }
-
-    return puzzle;
+    return null; // If no empty cell is found
   };
 
-  const getANoNConflictingNumber = (row, col, puzzle) => {
-    let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    let num = numbers.splice(getRandomInt(numbers.length), 1)[0];
-
-    while (numberConflicts(row, col, num, puzzle)) {
-      if (numbers.length > 0) {
-        num = numbers.splice(getRandomInt(numbers.length), 1)[0];
-      } else {
-        num = 0;
-        break;
+  const isValid = (board, row, col, num) => {
+    // Check if 'num' is not already present in the current row, column, and box
+    for (let x = 0; x < SIZE; x++) {
+      if (
+        board[row][x] === num ||
+        board[x][col] === num ||
+        board[row - (row % 3) + (x % 3)][
+          col - (col % 3) + Math.floor(x / 3)
+        ] === num
+      ) {
+        return false;
       }
     }
-
-    return num;
+    return true;
   };
+  const createRegions = (gameBoard) => {
+    return Array.from({ length: SIZE }, (_, row) =>
+      Array(SIZE)
+        .fill()
+        .map((_, col) => {
+          const region = Math.floor(col / 3) + Math.floor(row / 3) * 3;
+          const regionArrIndex = (col % 3) + (row % 3) * 3;
+          const value = gameBoard[row][col];
 
-  const numberConflicts = (row, col, num, puzzle) => {
-    const regionNumbers = puzzle
-      .slice(Math.floor(row / 3) * 3, Math.floor(row / 3) * 3 + 3)
-      .flatMap((r) =>
-        r.slice(Math.floor(col / 3) * 3, Math.floor(col / 3) * 3 + 3),
-      );
-
-    return (
-      puzzle[row].some((cell) => cell.value === num) ||
-      puzzle.map((r) => r[col]).some((cell) => cell.value === num) ||
-      regionNumbers.some((cell) => cell.value === num)
+          return {
+            col,
+            row,
+            region,
+            regionArrIndex,
+            value,
+            selected: false,
+            correct: null,
+            conflicting: false,
+            editable: value === null,
+            cellNotes: Array.from({ length: 9 }, (_, index) => ({
+              visible: false,
+              cellNoteNumber: index + 1,
+            })),
+          };
+        }),
     );
   };
 
-  const createRegions = (gameBoard) => {
-    const regions = Array.from({ length: 9 }, () => Array(9).fill({}));
+  const removeCellsBasedOnDifficulty = (puzzleWithRegions, difficulty) => {
+    let removalRange;
+    const puzzleCopy = [...puzzleWithRegions];
 
-    for (let row = 0; row < regions.length; row++) {
-      for (let col = 0; col < regions[row].length; col++) {
-        const region = Math.floor(col / 3) + Math.floor(row / 3) * 3;
-        const regionArrIndex = (col % 3) + (row % 3) * 3;
-        const value = gameBoard[row][col].value;
-
-        regions[row][col] = {
-          col,
-          row,
-          region,
-          regionArrIndex,
-          value,
-          selected: false,
-          correct: null,
-          conflicting: false,
-          editable: value === null,
-          cellNotes: Array.from({ length: 9 }, (_, index) => ({
-            visible: false,
-            cellNoteNumber: index + 1,
-          })),
-        };
-      }
+    switch (difficulty) {
+      case "easy":
+        removalRange = [32, 40]; // Remove between 32 to 40 cells
+        break;
+      case "medium":
+        removalRange = [40, 48]; // Remove between 40 to 48 cells
+        break;
+      case "hard":
+        removalRange = [48, 56]; // Remove between 48 to 56 cells
+        break;
+      default:
+        removalRange = [40, 48]; // Default to medium difficulty
     }
 
-    return regions;
+    const [minCellsToRemove, maxCellsToRemove] = removalRange;
+    const cellsToRemove = Math.floor(
+      Math.random() * (maxCellsToRemove - minCellsToRemove + 1) +
+        minCellsToRemove,
+    );
+
+    // Flatten the puzzle for easier removal
+    const flatPuzzle = puzzleCopy.flat();
+
+    // Remove cells randomly until reaching the desired number of removals
+    for (let i = 0; i < cellsToRemove; i++) {
+      const randomIndex = Math.floor(Math.random() * flatPuzzle.length);
+      flatPuzzle[randomIndex].value = null; // Set the cell value to null
+    }
+
+    // Convert the flat array back to a 2D array
+    for (let i = 0; i < SIZE; i++) {
+      puzzleCopy[i] = flatPuzzle.slice(i * SIZE, (i + 1) * SIZE);
+    }
+
+    return puzzleCopy;
   };
-
-  const initialGameBoard = generateSolvedPuzzle();
-  const [gameBoard, setGameBoard] = useState(initialGameBoard);
-  // console.log(gameBoard);
-
-  const initialRegions = createRegions(gameBoard);
-  const [regions, setRegions] = useState(initialRegions);
-  // console.log("regions", regions);
 
   const contextValue = {
     gameBoard,
-    setGameBoard,
     regions,
-    setRegions,
+    startGame,
+    loading,
   };
 
   return (

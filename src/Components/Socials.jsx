@@ -17,7 +17,7 @@ const Socials = () => {
       <motion.div
         initial={animations.initial}
         animate={animations.animate}
-        className="flex flex-col right-0 fixed bottom-0 justify-center items-center"
+        className="flex flex-col right-[15px] fixed bottom-0 justify-center items-center"
       >
         <div className="w-[2px] lightGray-gradient h-[40vh] mr-3" />
       </motion.div>

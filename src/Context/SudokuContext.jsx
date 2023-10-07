@@ -29,8 +29,7 @@ export const SudokuProvider = ({ children }) => {
       difficulty,
     );
     setRegions(puzzleWithRemovedCells);
-    console.log("Final gameBoard:", solvedGameBoard);
-    console.log("Final regions:", puzzleWithRemovedCells);
+    console.log("puzzleWithRemovedCells", puzzleWithRemovedCells);
     setLoading(false);
   };
 
@@ -114,11 +113,11 @@ export const SudokuProvider = ({ children }) => {
           const value = gameBoard[row][col];
 
           return {
-            col,
             row,
+            col,
+            value,
             region,
             regionArrIndex,
-            value,
             selected: false,
             correct: null,
             conflicting: false,
@@ -156,13 +155,13 @@ export const SudokuProvider = ({ children }) => {
         minCellsToRemove,
     );
 
-    // Flatten the puzzle for easier removal
     const flatPuzzle = puzzleCopy.flat();
 
     // Remove cells randomly until reaching the desired number of removals
     for (let i = 0; i < cellsToRemove; i++) {
       const randomIndex = Math.floor(Math.random() * flatPuzzle.length);
       flatPuzzle[randomIndex].value = null; // Set the cell value to null
+      flatPuzzle[randomIndex].editable = true; // Allow the user to edit the cell
     }
 
     // Convert the flat array back to a 2D array
@@ -174,6 +173,8 @@ export const SudokuProvider = ({ children }) => {
   };
 
   const contextValue = {
+    setGameBoard,
+    setRegions,
     gameBoard,
     regions,
     startGame,

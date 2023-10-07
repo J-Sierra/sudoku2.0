@@ -1,0 +1,64 @@
+$size: min(60vh, 60vw);
+$primaryBC: #222222;
+$secondaryBC: #ffd500;
+$cellSize: calc($size / 9 );
+
+@mixin on-circle($item-count, $circle-size, $item-size) {
+  > * {
+    position: absolute;
+    left: 50%;
+    width: $item-size;
+    height: $item-size;
+
+    $angle: calc(360 / $item-count);
+    $rot: 125.5;
+
+    @for $i from 1 through $item-count {
+      &:nth-of-type(#{$i}) {
+        transform: rotate($rot * 1deg)
+          translate(calc($circle-size / 2))
+          rotate($rot * -1deg);
+      }
+
+      $rot: $rot + $angle;
+    }
+  }
+}
+
+.bubbleRing {
+  @include on-circle(
+    $item-count: 10,
+    $circle-size: calc($size / 4),
+    $item-size: calc($size / 15)
+  );
+
+  transform: translate(-31%, calc(($size / 35) - 5px) );
+}
+
+.bubble {
+  font-size: calc($size / 22);
+}
+.gameboard {
+  height: $size;
+  width: $size;
+}
+
+.region {
+  height: calc($size / 3);
+  width: calc($size / 3);
+}
+.cell,
+.boldCell {
+  font-size: calc($cellSize / 1.5);
+  height: $cellSize;
+  width: $cellSize;
+}
+
+
+.cellNote {
+
+  font-size: calc($size / 33);
+  height: calc($cellSize / 3);
+  width: calc(($cellSize / 3));
+
+}

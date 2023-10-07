@@ -32,14 +32,14 @@ const MainMenu = ({ onStartGame }) => {
       >
         <motion.h1
           variants={childVariants}
-          className="text-[200px] select-none font-bold text-center mb-8 text-glow"
+          className="sm:text-[200px] text-6xl select-none font-bold text-center mb-8 text-glow"
         >
           Sudoku
         </motion.h1>
         <motion.div variants={childVariants}>
           <label
             htmlFor="difficulty"
-            className="text-[30px] select-none font-bold pr-3"
+            className="sm:text-[30px] select-none font-bold pr-3"
           >
             Select Difficulty:
           </label>
@@ -61,8 +61,10 @@ const MainMenu = ({ onStartGame }) => {
             backgroundColor: "#fff",
           }}
           whileTap={{ scale: 0.9 }}
-          onClick={() => onStartGame(true, selectedDifficulty)}
-          className="bg-tertiary text-white select-none px-4 py-2 rounded"
+          onClick={() => {
+            onStartGame(selectedDifficulty);
+          }}
+          className="bg-tertiary text-white select-none px-4 py-2 rounded mt-4"
           variants={childVariants}
         >
           Start Game

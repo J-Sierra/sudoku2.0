@@ -4,20 +4,20 @@ import StarsCanvas from "./Components/StarsCanvas.jsx";
 import { useState } from "react";
 import Socials from "./Components/Socials.jsx";
 import { AnimatePresence } from "framer-motion";
-import { SudokuProvider } from "./Context/SudokuContext.jsx";
+import { useSudokuContext } from "./Context/SudokuContext.jsx";
 
 function App() {
   const [gameStarted, setGameStarted] = useState(false);
-  const [difficulty, setDifficulty] = useState("easy");
+  const { startGame, loading } = useSudokuContext();
   const handleStartGame = (gameStart, difficulty) => {
     setGameStarted(gameStart);
-    setDifficulty(difficulty);
+    startGame(difficulty);
   };
 
   return (
-    <SudokuProvider>
+    <>
       <AnimatePresence mode="wait">
-        {gameStarted ? (
+        {gameStarted && !loading ? (
           <GameBoard key="gameBoard" />
         ) : (
           <MainMenu key="mainMenu" onStartGame={handleStartGame} />
@@ -25,7 +25,7 @@ function App() {
         {gameStarted && <StarsCanvas />}
       </AnimatePresence>
       <Socials />
-    </SudokuProvider>
+    </>
   );
 }
 

@@ -4,10 +4,6 @@ import { useState } from "react";
 const MainMenu = ({ onStartGame }) => {
   const [selectedDifficulty, setSelectedDifficulty] = useState("easy");
 
-  const handleDifficultyChange = (event) => {
-    setSelectedDifficulty(event.target.value);
-  };
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -46,12 +42,13 @@ const MainMenu = ({ onStartGame }) => {
           <motion.select
             id="difficulty"
             value={selectedDifficulty}
-            onChange={handleDifficultyChange}
+            onChange={(e) => setSelectedDifficulty(e.target.value)}
             className="mr-4 px-4 py-2 select-none rounded border-2 border-gray-400"
           >
             <option value="easy">Easy</option>
             <option value="medium">Medium</option>
             <option value="hard">Hard</option>
+            <option value="expert">Expert</option>
           </motion.select>
         </motion.div>
         <motion.button
@@ -62,7 +59,7 @@ const MainMenu = ({ onStartGame }) => {
           }}
           whileTap={{ scale: 0.9 }}
           onClick={() => {
-            onStartGame(selectedDifficulty);
+            onStartGame(true, selectedDifficulty);
           }}
           className="bg-tertiary text-white select-none px-4 py-2 rounded mt-4"
           variants={childVariants}

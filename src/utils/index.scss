@@ -47,8 +47,7 @@ $cellSize: calc($size / 9 );
   height: calc($size / 3);
   width: calc($size / 3);
 }
-.cell,
-.boldCell {
+.cell{
   font-size: calc($cellSize / 1.5);
   height: $cellSize;
   width: $cellSize;
@@ -58,7 +57,7 @@ $cellSize: calc($size / 9 );
 .cellNote {
 
   font-size: calc($size / 33);
-  height: calc($cellSize / 3);
+  height: calc(($cellSize / 3));
   width: calc(($cellSize / 3));
 
 }

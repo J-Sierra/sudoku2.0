@@ -4,21 +4,22 @@ import BubbleRing from "./BubbleRing.jsx";
 
 const Cell = ({ cell }) => {
   const [editing, setEditing] = useState(false);
-  const { value, editable, cellNotes } = cell;
+  const { value, editable, cellNotes, correct, conflicting } = cell;
 
   return (
     <div
       onClick={editable ? () => setEditing(!editing) : null}
-      className={`cell ${
-        !editable ? "font-bold bg-gray-200" : "bg-white"
-      } items-center border-[1px] border-black text-black grid justify-center relative select-none `}
+      className={`cell ${!editable ? "font-bold bg-gray-200" : "bg-white"}
+        ${correct ? null : "bg-red-500"} 
+        ${conflicting ? "bg-red-300" : ""}
+       items-center border-[1px] border-black text-black grid justify-center relative select-none `}
     >
       {!editing ? value : null}
       {editing && <BubbleRing cell={cell} />}
 
       <div
         className={
-          "cellNoteContainer grid grid-cols-3 grid-rows-3 h-full w-full relative"
+          "mt-[-.5px] grid grid-cols-3 grid-rows-3 h-full w-full relative"
         }
       >
         {editable &&
@@ -34,22 +35,22 @@ const Cell = ({ cell }) => {
       </div>
       <div
         className={
-          "cellNoteContainer grid grid-cols-3 grid-rows-3 h-full w-full relative"
+          "mt-[-.5px] grid grid-cols-3 grid-rows-3 h-full w-full relative"
         }
       >
         {!editing &&
           !value &&
-          cellNotes.map((note) => (
-            <span
-              className={"cellNoteActive"}
-              key={note.cellNoteNumber}
+          cellNotes.map((note, key) => (
+            <div
               style={{
                 visibility: note.visible ? "visible" : "hidden",
                 pointerEvents: "none",
               }}
+              key={key}
+              className="cellNote flex hover:bg-gray-400 items-center justify-center cursor-pointer select-none text-center"
             >
               {note.cellNoteNumber}
-            </span>
+            </div>
           ))}
       </div>
     </div>

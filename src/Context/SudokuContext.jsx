@@ -202,8 +202,7 @@ export const SudokuProvider = ({ children }) => {
 
     // Update the state with the modified array
     setRegions(newRegions);
-    console.log("new cell: ", regions[region][regionArrIndex]);
-    handleConflicting(regions[region][regionArrIndex]);
+    handleConflicting();
   };
   const checkIfCorrect = (cell, newValue) => {
     if (newValue === "x") {
@@ -225,48 +224,45 @@ export const SudokuProvider = ({ children }) => {
     });
   };
 
-  const handleConflicting = (cell) => {
-    const { row, col, region, value, cellId } = cell;
+  const handleConflicting = () => {
     const newRegions = [...regions];
-    const conflictingCells = [];
 
-    // Check if the value conflicts with the row
-    newRegions.map((_region) => {
-      _region.map((cell) => {
-        if (value) {
-          if (
-            cell.row === row &&
-            cell.value === value &&
-            cell.cellId !== cellId
-          ) {
-            conflictingCells.push(cell);
-          }
-          if (
-            cell.col === col &&
-            cell.value === value &&
-            cell.cellId !== cellId
-          ) {
-            conflictingCells.push(cell);
-          }
-          if (
-            cell.region === region &&
-            cell.value === value &&
-            cell.cellId !== cellId
-          ) {
-            conflictingCells.push(cell);
-          }
-        }
-      });
+    // Reset conflicting property to false for all cells
+    newRegions.flat().forEach((cell) => {
+      cell.conflicting = false;
     });
 
-    conflictingCells.map((cell) => {
-      newRegions[cell.region][cell.regionArrIndex] = {
-        ...newRegions[cell.region][cell.regionArrIndex],
+    const conflictingCells = [];
+
+    // Check if the value conflicts with the row, column, or region
+    newRegions.flat().forEach((cell) => {
+      const { row, col, region, value, cellId } = cell;
+      newRegions
+        .flat()
+        .filter((otherCell) => otherCell.cellId !== cellId && value)
+        .some((otherCell) => {
+          if (otherCell.row === row && otherCell.value === value) {
+            conflictingCells.push(otherCell);
+          }
+          if (otherCell.col === col && otherCell.value === value) {
+            conflictingCells.push(otherCell);
+          }
+          if (otherCell.region === region && otherCell.value === value) {
+            conflictingCells.push(otherCell);
+          }
+        });
+    });
+
+    // Update conflicting property for conflicting cells
+    conflictingCells.forEach((conflictingCell) => {
+      const { region, regionArrIndex } = conflictingCell;
+      newRegions[region][regionArrIndex] = {
+        ...newRegions[region][regionArrIndex],
         conflicting: true,
       };
     });
+
     setRegions(newRegions);
-    console.log("conflicting cells: ", conflictingCells);
   };
 
   const contextValue = {

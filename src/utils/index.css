@@ -52,8 +52,7 @@
   width: calc(min(60vh, 60vw) / 3);
 }
 
-.cell,
-.boldCell {
+.cell {
   font-size: calc(min(60vh, 60vw) / 9 / 1.5);
   height: calc(min(60vh, 60vw) / 9);
   width: calc(min(60vh, 60vw) / 9);

@@ -8,14 +8,14 @@ const GameBoard = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1, transition: { duration: 2 } }}
-      className=" h-screen flex flex-col justify-center items-center"
+      initial={{ y: -100, opacity: 0 }}
+      animate={{ y: 0, opacity: 1, transition: { duration: 2 } }}
+      className="h-screen flex flex-col justify-center items-center"
     >
       <motion.h1 className="sm:text-[100px] text-6xl justify-self-start select-none font-bold text-center mb-8 text-glow">
         Sudoku
       </motion.h1>
-      <div className="items-center grid grid-cols-3 grid-rows-3 justify-center gameboard ">
+      <div className="items-center grid grid-cols-3 grid-rows-3 justify-center gameboard">
         {regions.map((region, index) => (
           <Region key={index} region={region} />
         ))}

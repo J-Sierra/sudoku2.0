@@ -16,13 +16,13 @@ function App() {
 
   return (
     <>
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {gameStarted && !loading ? (
           <GameBoard key="gameBoard" />
         ) : (
           <MainMenu key="mainMenu" onStartGame={handleStartGame} />
         )}
-        {gameStarted && <StarsCanvas />}
+        {/*{gameStarted && <StarsCanvas key="starsCanvas" />}*/}
       </AnimatePresence>
       <Socials />
     </>

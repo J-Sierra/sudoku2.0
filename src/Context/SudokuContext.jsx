@@ -29,7 +29,6 @@ export const SudokuProvider = ({ children }) => {
       difficulty,
     );
     setRegions(puzzleWithRemovedCells);
-    console.log("puzzleWithRemovedCells", puzzleWithRemovedCells);
     setLoading(false);
   };
 
@@ -104,31 +103,33 @@ export const SudokuProvider = ({ children }) => {
     return true;
   };
   const createRegions = (gameBoard) => {
-    return Array.from({ length: SIZE }, (_, row) =>
-      Array(SIZE)
-        .fill()
-        .map((_, col) => {
-          const region = Math.floor(col / 3) + Math.floor(row / 3) * 3;
-          const regionArrIndex = (col % 3) + (row % 3) * 3;
-          const value = gameBoard[row][col];
-
-          return {
-            row,
-            col,
-            value,
-            region,
-            regionArrIndex,
-            selected: false,
-            correct: null,
-            conflicting: false,
-            editable: value === null,
-            cellNotes: Array.from({ length: 9 }, (_, index) => ({
-              visible: false,
-              cellNoteNumber: index + 1,
-            })),
-          };
-        }),
-    );
+    let cellId = 0;
+    const newRegions = [[], [], [], [], [], [], [], [], []];
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        const region = Math.floor(col / 3) + Math.floor(row / 3) * 3;
+        const regionArrIndex = (col % 3) + (row % 3) * 3;
+        const value = gameBoard[row][col];
+        newRegions[region].push({
+          row,
+          col,
+          value,
+          region,
+          regionArrIndex,
+          selected: false,
+          correct: true,
+          conflicting: false,
+          editable: value === null,
+          cellNotes: Array.from({ length: 9 }, (_, index) => ({
+            visible: false,
+            cellNoteNumber: index + 1,
+          })),
+          cellId: cellId,
+        });
+        cellId++;
+      }
+    }
+    return newRegions;
   };
 
   const removeCellsBasedOnDifficulty = (puzzleWithRegions, difficulty) => {
@@ -137,31 +138,45 @@ export const SudokuProvider = ({ children }) => {
 
     switch (difficulty) {
       case "easy":
-        removalRange = [32, 40]; // Remove between 32 to 40 cells
+        removalRange = [32, 40];
         break;
       case "medium":
-        removalRange = [40, 48]; // Remove between 40 to 48 cells
+        removalRange = [40, 48];
         break;
       case "hard":
-        removalRange = [48, 56]; // Remove between 48 to 56 cells
+        removalRange = [48, 56];
+        break;
+      case "expert":
+        removalRange = [56, 64];
+        break;
+      case "test":
+        removalRange = [0, 0];
         break;
       default:
-        removalRange = [40, 48]; // Default to medium difficulty
+        removalRange = [40, 48];
     }
 
     const [minCellsToRemove, maxCellsToRemove] = removalRange;
-    const cellsToRemove = Math.floor(
-      Math.random() * (maxCellsToRemove - minCellsToRemove + 1) +
-        minCellsToRemove,
-    );
-
     const flatPuzzle = puzzleCopy.flat();
 
+    // Create an array of all possible cells with non-null values
+    const nonEmptyCells = flatPuzzle.filter((cell) => cell.value !== null);
+
     // Remove cells randomly until reaching the desired number of removals
-    for (let i = 0; i < cellsToRemove; i++) {
-      const randomIndex = Math.floor(Math.random() * flatPuzzle.length);
-      flatPuzzle[randomIndex].value = null; // Set the cell value to null
-      flatPuzzle[randomIndex].editable = true; // Allow the user to edit the cell
+    for (let i = 0; i < maxCellsToRemove; i++) {
+      if (nonEmptyCells.length === 0) {
+        // If there are no more non-empty cells, break to avoid an infinite loop
+        break;
+      }
+
+      const randomIndex = Math.floor(Math.random() * nonEmptyCells.length);
+      const selectedCell = nonEmptyCells[randomIndex];
+
+      selectedCell.value = null; // Set the cell value to null
+      selectedCell.editable = true; // Allow the user to edit the cell
+
+      // Remove the selected cell from the array of non-empty cells
+      nonEmptyCells.splice(randomIndex, 1);
     }
 
     // Convert the flat array back to a 2D array
@@ -171,8 +186,92 @@ export const SudokuProvider = ({ children }) => {
 
     return puzzleCopy;
   };
+  const handleBubbleClick = (cell, newValue) => {
+    const { region, regionArrIndex } = cell;
+    const newRegions = [...regions];
+    newRegions[region][regionArrIndex] = {
+      ...newRegions[region][regionArrIndex],
+      selected: true,
+      value: newValue === "x" ? null : newValue,
+      correct: checkIfCorrect(cell, newValue),
+      cellNotes: Array.from({ length: 9 }, (_, index) => ({
+        visible: false,
+        cellNoteNumber: index + 1,
+      })),
+    };
+
+    // Update the state with the modified array
+    setRegions(newRegions);
+    console.log("new cell: ", regions[region][regionArrIndex]);
+    handleConflicting(regions[region][regionArrIndex]);
+  };
+  const checkIfCorrect = (cell, newValue) => {
+    if (newValue === "x") {
+      return true;
+    }
+    return newValue === gameBoard[cell.row][cell.col];
+  };
+
+  const handleCellNoteClick = (cell, cellNoteNumber) => {
+    const { region, regionArrIndex } = cell;
+    setRegions((prevRegions) => {
+      const newRegions = [...prevRegions];
+      const cellNotes = newRegions[region][regionArrIndex].cellNotes;
+      cellNotes[cellNoteNumber - 1] = {
+        ...cellNotes[cellNoteNumber - 1],
+        visible: !cellNotes[cellNoteNumber - 1].visible,
+      };
+      return newRegions;
+    });
+  };
+
+  const handleConflicting = (cell) => {
+    const { row, col, region, value, cellId } = cell;
+    const newRegions = [...regions];
+    const conflictingCells = [];
+
+    // Check if the value conflicts with the row
+    newRegions.map((_region) => {
+      _region.map((cell) => {
+        if (value) {
+          if (
+            cell.row === row &&
+            cell.value === value &&
+            cell.cellId !== cellId
+          ) {
+            conflictingCells.push(cell);
+          }
+          if (
+            cell.col === col &&
+            cell.value === value &&
+            cell.cellId !== cellId
+          ) {
+            conflictingCells.push(cell);
+          }
+          if (
+            cell.region === region &&
+            cell.value === value &&
+            cell.cellId !== cellId
+          ) {
+            conflictingCells.push(cell);
+          }
+        }
+      });
+    });
+
+    conflictingCells.map((cell) => {
+      newRegions[cell.region][cell.regionArrIndex] = {
+        ...newRegions[cell.region][cell.regionArrIndex],
+        conflicting: true,
+      };
+    });
+    setRegions(newRegions);
+    console.log("conflicting cells: ", conflictingCells);
+  };
 
   const contextValue = {
+    handleCellNoteClick,
+    handleBubbleClick,
     setGameBoard,
     setRegions,
     gameBoard,

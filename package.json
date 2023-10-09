@@ -3,7 +3,6 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://johnnysierra.com/sudoku",
   "scripts": {
     "dev": "vite",
     "build": "vite build && move dist docs",

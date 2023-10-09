@@ -1,7 +1,6 @@
 import MainMenu from "./Components/MainMenu.jsx";
 import GameBoard from "./Components/Gameboard comps/GameBoard.jsx";
 import StarsCanvas from "./Components/Canvas/StarsCanvas.jsx";
-import { useState } from "react";
 import Socials from "./Components/Socials.jsx";
 import { AnimatePresence } from "framer-motion";
 import { useSudokuContext } from "./Context/SudokuContext.jsx";
@@ -22,21 +21,9 @@ function App() {
         <div className="w-screen h-screen flex flex-col justify-center items-center">
           {gameStarted && !loading ? (
             solved ? (
-              <motion.div
-                initial={{ y: -100, opacity: 0 }}
-                animate={{ y: 0, opacity: 1, transition: { duration: 2 } }}
-                exit={{ y: "-100%", opacity: 0, transition: { duration: 1 } }}
-              >
-                <EndGameMenu />
-              </motion.div>
+              <EndGameMenu />
             ) : (
-              <motion.div
-                initial={{ y: -100, opacity: 0 }}
-                animate={{ y: 0, opacity: 1, transition: { duration: 2 } }}
-                exit={{ y: "-100%", opacity: 0, transition: { duration: 1 } }}
-              >
-                <GameBoard key="gameBoard" onStartGame={handleStartGame} />
-              </motion.div>
+              <GameBoard key="gameBoard" onStartGame={handleStartGame} />
             )
           ) : (
             <motion.div

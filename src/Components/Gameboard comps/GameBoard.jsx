@@ -12,7 +12,7 @@ const GameBoard = ({ onStartGame }) => {
   return (
     <motion.div
       initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1, transition: { duration: 2 } }}
+      animate={{ y: 0, opacity: 1, transition: { duration: 6 } }}
       exit={{ y: "-100%", opacity: 0, transition: { duration: 1 } }}
       className="h-screen flex flex-col justify-center items-center relative"
     >

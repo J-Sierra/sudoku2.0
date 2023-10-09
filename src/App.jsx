@@ -5,7 +5,6 @@ import Socials from "./Components/Socials.jsx";
 import { AnimatePresence } from "framer-motion";
 import { useSudokuContext } from "./Context/SudokuContext.jsx";
 import EndGameMenu from "./Components/EndGameMenu.jsx";
-import { motion } from "framer-motion";
 
 function App() {
   const { startGame, loading, gameStarted, setGameStarted, solved } =

@@ -35,5 +35,5 @@ Sudoku with React is a web application that brings the timeless game of Sudoku t
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/your-username/sudoku-react.git
-   cd sudoku-react
+   git clone https://github.com/J-Sierra/sudoku2.0
+   cd sudoku2.0

@@ -1,8 +1,8 @@
-import React, { useRef, Suspense, useState } from "react";
-import { Canvas, useFrame } from "react-three-fiber";
-import { Preload, Points } from "drei";
+import { useState, useRef, Suspense } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Points, PointMaterial, Preload } from "@react-three/drei";
 
-const generateRandomStarPoints = (numPoints, radius) => {
+function generateRandomSpherePoints(numPoints, radius) {
   const points = [];
 
   for (let i = 0; i < numPoints; i++) {
@@ -15,43 +15,15 @@ const generateRandomStarPoints = (numPoints, radius) => {
     const y = r * Math.sin(phi) * Math.sin(theta);
     const z = r * Math.cos(phi);
 
-    const type = Math.floor(Math.random() * 3); // Randomly select a type (0, 1, or 2)
-    points.push({ x, y, z, type });
+    points.push(x, y, z);
   }
 
-  return points;
-};
-
-const StarShapes = {
-  0: (position) => (
-    <mesh position={position}>
-      <sphereBufferGeometry args={[0.01, 8, 8]} />
-      <meshBasicMaterial color="#fff" />
-    </mesh>
-  ),
-  1: (position) => (
-    <group position={position}>
-      <mesh position={[0, 0, 0]}>
-        <boxBufferGeometry args={[0.02, 0.005, 0.005]} />
-        <meshBasicMaterial color="#fff" />
-      </mesh>
-      <mesh position={[0, 0, 0]}>
-        <boxBufferGeometry args={[0.005, 0.02, 0.005]} />
-        <meshBasicMaterial color="#fff" />
-      </mesh>
-    </group>
-  ),
-  2: (position) => (
-    <mesh position={position}>
-      <coneBufferGeometry args={[0.01, 0.02, 3]} />
-      <meshBasicMaterial color="#fff" />
-    </mesh>
-  ),
-};
+  return new Float32Array(points);
+}
 
 const Stars = (props) => {
   const ref = useRef();
-  const [stars] = useState(() => generateRandomStarPoints(2000, 1));
+  const [sphere] = useState(() => generateRandomSpherePoints(2000, 1));
 
   useFrame((state, delta) => {
     ref.current.rotation.x -= delta / 10;
@@ -61,11 +33,15 @@ const Stars = (props) => {
 
   return (
     <group rotation={[0, 0, Math.PI / 4]}>
-      {stars.map((star, index) => (
-        <React.Fragment key={index}>
-          {StarShapes[star.type]([star.x, star.y, star.z])}
-        </React.Fragment>
-      ))}
+      <Points ref={ref} positions={sphere} stride={3} frustumCulled {...props}>
+        <PointMaterial
+          transparent
+          color="#fff"
+          size={0.002}
+          sizeAttenuation={true}
+          depthWrite={false}
+        />
+      </Points>
     </group>
   );
 };

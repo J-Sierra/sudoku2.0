@@ -52,7 +52,7 @@ const MainMenu = ({ onStartGame }) => {
             <option value="medium">Medium</option>
             <option value="hard">Hard</option>
             <option value="expert">Expert</option>
-            <option value="test">Test</option>
+            {/*<option value="test">Test</option>*/}
           </motion.select>{" "}
         </motion.div>{" "}
         <motion.button

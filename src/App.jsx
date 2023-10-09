@@ -26,13 +26,7 @@ function App() {
               <GameBoard key="gameBoard" onStartGame={handleStartGame} />
             )
           ) : (
-            <motion.div
-              initial={{ y: -100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1, transition: { duration: 2 } }}
-              exit={{ y: "-100%", opacity: 0, transition: { duration: 1 } }}
-            >
-              <MainMenu key="mainMenu" onStartGame={handleStartGame} />
-            </motion.div>
+            <MainMenu key="mainMenu" onStartGame={handleStartGame} />
           )}
           {gameStarted && <StarsCanvas key="starsCanvas" />}
         </div>

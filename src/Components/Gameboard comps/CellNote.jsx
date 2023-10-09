@@ -1,4 +1,4 @@
-import { useSudokuContext } from "../Context/SudokuContext.jsx";
+import { useSudokuContext } from "../../Context/SudokuContext.jsx";
 
 const CellNote = ({ cell, note }) => {
   const { handleCellNoteClick } = useSudokuContext();

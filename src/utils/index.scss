@@ -1,4 +1,6 @@
 $size: min(60vh, 60vw);
+$size-phone: min(85vh, 85vw);
+
 $primaryBC: #222222;
 $secondaryBC: #ffd500;
 $cellSize: calc($size / 9 );
@@ -10,18 +12,6 @@ $cellSize: calc($size / 9 );
     width: $item-size;
     height: $item-size;
 
-    $angle: calc(360 / $item-count);
-    $rot: 125.5;
-
-    @for $i from 1 through $item-count {
-      &:nth-of-type(#{$i}) {
-        transform: rotate($rot * 1deg)
-          translate(calc($circle-size / 2))
-          rotate($rot * -1deg);
-      }
-
-      $rot: $rot + $angle;
-    }
   }
 }
 
@@ -59,5 +49,66 @@ $cellSize: calc($size / 9 );
   font-size: calc($size / 33);
   height: calc(($cellSize / 3));
   width: calc(($cellSize / 3));
+
+}
+.puzzleOptions {
+  height: calc($size / 18);
+  width: calc($size / 18);
+}
+.puzzleOptionText {
+  font-size: calc($size / 33);
+}
+.puzzleOptionContainer {
+  width: calc($size );
+}
+.switch {
+  height: calc($size / 18);
+  width: calc($size / 9);
+}
+@media (max-width: 600px) {
+
+    .bubbleRing{
+        @include on-circle(
+            $item-count: 10,
+            $circle-size: calc($size-phone / 4),
+            $item-size: calc($size-phone / 15)
+        );
+        transform: translate(-31%, calc(($size-phone / 35) - 5px) );
+    }
+    .bubble {
+        font-size: calc($size-phone / 22);
+    }
+    .gameboard {
+        height: $size-phone;
+        width: $size-phone;
+    }
+    .region {
+        height: calc($size-phone / 3);
+        width: calc($size-phone / 3);
+    }
+    .cell{
+        font-size: calc($cellSize / 1.5);
+        height: calc($size-phone / 9);
+        width: calc($size-phone / 9);
+    }
+    .cellNote {
+        font-size: calc($size-phone / 33);
+        height: calc((calc($size-phone / 9) / 3));
+        width: calc((calc($size-phone / 9) / 3));
+    }
+    .puzzleOptions {
+        height: calc($size-phone / 18);
+        width: calc($size-phone / 18);
+    }
+    .puzzleOptionText {
+        font-size: calc($size-phone / 33);
+    }
+    .puzzleOptionContainer {
+        width: calc($size-phone );
+    }
+    .switch {
+        height: calc($size-phone / 18);
+        width: calc($size-phone / 9);
+    }
 
 }

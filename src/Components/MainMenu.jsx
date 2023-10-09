@@ -28,11 +28,14 @@ const MainMenu = ({ onStartGame }) => {
       >
         <motion.h1
           variants={childVariants}
-          className="sm:text-[200px] text-6xl select-none font-bold text-center mb-8 text-glow"
+          className="sm:text-[150px] md:text-[200px] text-6xl select-none font-bold text-center mb-8 text-glow"
         >
           Sudoku
         </motion.h1>
-        <motion.div variants={childVariants}>
+        <motion.div
+          className="flex flex-col items-center justify-center sm:block sm:flex-row sm:justify-start sm:items-center gap-4"
+          variants={childVariants}
+        >
           <label
             htmlFor="difficulty"
             className="sm:text-[30px] select-none font-bold pr-3"
@@ -43,14 +46,15 @@ const MainMenu = ({ onStartGame }) => {
             id="difficulty"
             value={selectedDifficulty}
             onChange={(e) => setSelectedDifficulty(e.target.value)}
-            className="mr-4 px-4 py-2 select-none rounded border-2 border-gray-400"
+            className="mr-4 px-4 py-2 select-none rounded border-2 border-gray-400  "
           >
             <option value="easy">Easy</option>
             <option value="medium">Medium</option>
             <option value="hard">Hard</option>
             <option value="expert">Expert</option>
-          </motion.select>
-        </motion.div>
+            <option value="test">Test</option>
+          </motion.select>{" "}
+        </motion.div>{" "}
         <motion.button
           whileHover={{
             scale: 1.1,
@@ -61,7 +65,7 @@ const MainMenu = ({ onStartGame }) => {
           onClick={() => {
             onStartGame(true, selectedDifficulty);
           }}
-          className="bg-tertiary text-white select-none px-4 py-2 rounded mt-4"
+          className="bg-tertiary text-white select-none px-4 py-2 rounded mt-4 ml-[-16px]"
           variants={childVariants}
         >
           Start Game

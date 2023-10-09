@@ -7,13 +7,32 @@ export const useSudokuContext = () => {
 };
 
 export const SudokuProvider = ({ children }) => {
+  const SIZE = 9;
+
   const [gameBoard, setGameBoard] = useState([]);
   const [regions, setRegions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const SIZE = 9;
+  const [showErrors, setShowErrors] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [solved, setSolved] = useState(false);
+  const [endGameStats, setEndGameStats] = useState({
+    time: 0,
+    difficulty: "",
+    cluesUsed: 0,
+    errors: 0,
+  });
 
   const startGame = async (difficulty) => {
     setLoading(true);
+    setSolved(false);
+    setEndGameStats(() => {
+      return {
+        time: 0,
+        difficulty: "",
+        cluesUsed: 0,
+        errors: 0,
+      };
+    });
 
     // Generate a solved puzzle
     const solvedGameBoard = generateSolvedPuzzle();
@@ -75,7 +94,6 @@ export const SudokuProvider = ({ children }) => {
 
     return false;
   };
-
   const findEmptyCell = (board) => {
     for (let row = 0; row < SIZE; row++) {
       for (let col = 0; col < SIZE; col++) {
@@ -86,7 +104,6 @@ export const SudokuProvider = ({ children }) => {
     }
     return null; // If no empty cell is found
   };
-
   const isValid = (board, row, col, num) => {
     // Check if 'num' is not already present in the current row, column, and box
     for (let x = 0; x < SIZE; x++) {
@@ -131,7 +148,6 @@ export const SudokuProvider = ({ children }) => {
     }
     return newRegions;
   };
-
   const removeCellsBasedOnDifficulty = (puzzleWithRegions, difficulty) => {
     let removalRange;
     const puzzleCopy = [...puzzleWithRegions];
@@ -150,12 +166,12 @@ export const SudokuProvider = ({ children }) => {
         removalRange = [56, 64];
         break;
       case "test":
-        removalRange = [0, 0];
+        removalRange = [1, 1];
         break;
       default:
         removalRange = [40, 48];
     }
-
+    handleEndGameStatsDifficulty(difficulty);
     const [minCellsToRemove, maxCellsToRemove] = removalRange;
     const flatPuzzle = puzzleCopy.flat();
 
@@ -186,6 +202,7 @@ export const SudokuProvider = ({ children }) => {
 
     return puzzleCopy;
   };
+
   const handleBubbleClick = (cell, newValue) => {
     const { region, regionArrIndex } = cell;
     const newRegions = [...regions];
@@ -203,12 +220,18 @@ export const SudokuProvider = ({ children }) => {
     // Update the state with the modified array
     setRegions(newRegions);
     handleConflicting();
+    setSolved(checkIfSolved());
   };
   const checkIfCorrect = (cell, newValue) => {
     if (newValue === "x") {
       return true;
     }
-    return newValue === gameBoard[cell.row][cell.col];
+    if (newValue === gameBoard[cell.row][cell.col]) {
+      return true;
+    } else {
+      handleEndGameStatsErrors();
+      return false;
+    }
   };
 
   const handleCellNoteClick = (cell, cellNoteNumber) => {
@@ -264,16 +287,122 @@ export const SudokuProvider = ({ children }) => {
 
     setRegions(newRegions);
   };
+  const handleErrorSwitch = () => {
+    setShowErrors(!showErrors);
+  };
+  const handleClues = () => {
+    const newRegions = [...regions];
+    const flatGameboard = gameBoard.flat();
+    const flatPuzzle = newRegions.flat();
+    const nullCells = flatPuzzle.filter((cell) => cell.value === null);
+
+    if (nullCells.length === 0) {
+      console.log("No null cells available for clues");
+      setSolved(checkIfSolved());
+      return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * nullCells.length);
+    const selectedCell = nullCells[randomIndex];
+
+    // Check if the selected cell is already filled
+    if (selectedCell.value !== null) {
+      console.log("Selected cell is not null");
+      return;
+    }
+
+    const { region, regionArrIndex } = selectedCell;
+    newRegions[region][regionArrIndex] = {
+      ...newRegions[region][regionArrIndex],
+      value: flatGameboard[selectedCell.cellId],
+    };
+
+    setRegions(newRegions);
+    setSolved(checkIfSolved());
+    handleEndGameStatsCluesUsed();
+  };
+  const checkIfSolved = () => {
+    const flatPuzzle = regions.flat();
+    return flatPuzzle.every(
+      (cell) => cell.value === gameBoard[cell.row][cell.col],
+    );
+  };
+  const handleBackArrowClick = () => {
+    setGameStarted(false);
+    setLoading(true);
+    setSolved(false);
+  };
+  const handleSetTime = (time) => {
+    setEndGameStats((prevStats) => ({ ...prevStats, time }));
+  };
+  const handleEndGameStatsDifficulty = (difficulty) => {
+    setEndGameStats((prevStats) => ({ ...prevStats, difficulty }));
+  };
+  const handleEndGameStatsCluesUsed = () => {
+    setEndGameStats((prevStats) => ({
+      ...prevStats,
+      cluesUsed: prevStats.cluesUsed + 1,
+    }));
+  };
+  const handleEndGameStatsErrors = () => {
+    setEndGameStats((prevStats) => ({
+      ...prevStats,
+      errors: prevStats.errors + 1,
+    }));
+  };
+  const calculateScore = () => {
+    const { time, cluesUsed, errors, difficulty } = endGameStats;
+
+    // Define weights for each stat
+    const startScore = {
+      easy: 10000,
+      medium: 25000,
+      hard: 50000,
+      expert: 100000,
+    };
+
+    const timeWeight = -10000 / 600; // 10,000 points for 10 minutes
+    const cluesUsedWeight = 2000;
+    const errorsWeight = 5000;
+
+    // Adjust score based on difficulty
+    const difficultyWeights = {
+      easy: 1,
+      medium: 1.5,
+      hard: 2,
+      expert: 2.5,
+    };
+
+    let score = startScore[difficulty];
+    score -=
+      (time * timeWeight +
+        cluesUsed * cluesUsedWeight +
+        errors * errorsWeight) *
+      difficultyWeights[difficulty];
+
+    // Ensure the score is non-negative
+    return Math.round(Math.max(0, score));
+  };
 
   const contextValue = {
     handleCellNoteClick,
     handleBubbleClick,
+    handleErrorSwitch,
+    handleBackArrowClick,
+    handleSetTime,
+    handleClues,
+    calculateScore,
+    setGameStarted,
+    showErrors,
     setGameBoard,
     setRegions,
     gameBoard,
     regions,
+    gameStarted,
     startGame,
     loading,
+    solved,
+    endGameStats,
   };
 
   return (

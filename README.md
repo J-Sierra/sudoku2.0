@@ -29,7 +29,7 @@ Sudoku with React is a web application that brings the timeless game of Sudoku t
 - React
 - Tailwind CSS
 - Motion Library for React
-- ... (Add any other relevant technologies)
+- three.js
 
 ## Getting Started
 

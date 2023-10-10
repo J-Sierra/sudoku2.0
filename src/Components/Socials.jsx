@@ -14,7 +14,7 @@ const Socials = () => {
         className="flex-col fixed bottom-0 justify-center items-center gap-5 hidden lg:flex"
       >
         <a
-          href="https://github.com/J-Sierra/React_Sudoku_Puzzle"
+          href="https://github.com/J-Sierra/sudoku2.0"
           target="_blank"
           rel="noopener noreferrer"
           className="text-white text-[30px] hover:text-[#915eff] transition-all duration-300 ml-4"
